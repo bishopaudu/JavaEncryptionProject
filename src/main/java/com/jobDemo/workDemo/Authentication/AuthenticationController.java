@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping(path = "api/v1/auth")
+@RequestMapping(path = "/api")
 @RequiredArgsConstructor
 public class AuthenticationController {
   private final   AuthenticationService authenticationService;
@@ -24,7 +24,7 @@ public class AuthenticationController {
     //AuthenticationRepository authenticationRepository;
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody User user) {
+    public ResponseEntity<?> registerUser(@RequestBody User user) {
         User existingUser = authenticationService.getUserByEmail(user.getEmail());
         if (existingUser != null) {
             return ResponseEntity.badRequest().body("user already exists");
@@ -51,8 +51,8 @@ public class AuthenticationController {
     }
 
     @GetMapping("/registertry")
-    public String showRegistrationPage() {
-        return "registration";
+    public ResponseEntity<?> showRegistrationPage() {
+        return new ResponseEntity("user registeredd",HttpStatus.OK);
     }
 
 
