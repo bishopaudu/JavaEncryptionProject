@@ -1,35 +1,25 @@
 package com.jobDemo.workDemo.FileEncrypt;
 
 import org.springframework.stereotype.Service;
-
 import javax.crypto.Cipher;
-import javax.crypto.CipherOutputStream;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import javax.crypto.spec.SecretKeySpec;
+
 
 @Service
 public class FileEncryptService {
 
-    public void fileEncryption(String inputFile, String outputFile,
-                               SecretKey secretKey) throws Exception{
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        cipher.init(Cipher.ENCRYPT_MODE,secretKey);
+    public byte[] encryptWithKey(String encryptionKey,byte[] fileBytes) throws Exception{
+        SecretKeySpec keySpec = new SecretKeySpec(encryptionKey.getBytes(), "AES");
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec);
+        return cipher.doFinal(fileBytes);
 
-        try(FileInputStream fileInputStream = new FileInputStream(inputFile);
-                FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
-            CipherOutputStream cipherOutputStream = new CipherOutputStream(fileOutputStream,cipher)) {
+    }
 
-            byte[] buffer = new byte[4096];
-            int bytesRead;
-            while ((bytesRead = fileInputStream.read(buffer)) != -1) {
-                cipherOutputStream.write(buffer, 0, bytesRead);
-            }
-
-        }
-
+    public byte[] decryptWithKey(byte[] encryptedFile, String decryptionKey) throws Exception {
+        SecretKeySpec keySpec = new SecretKeySpec(decryptionKey.getBytes(), "AES");
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.DECRYPT_MODE, keySpec);
+        return cipher.doFinal(encryptedFile);
     }
 }

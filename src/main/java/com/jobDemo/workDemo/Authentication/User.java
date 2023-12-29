@@ -1,5 +1,6 @@
 package com.jobDemo.workDemo.Authentication;
 
+
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
@@ -7,20 +8,37 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.UUID;
 
 @Entity
 @Getter
 @Setter
 public class User implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(name = "email",unique = true)
     private String email;
-    @Column(nullable = false)
+    @Column(name = "password",nullable = false)
     private String password;
+    @Column(name = "username",nullable = false,unique = true)
+    private String username;
+    @Column(name = "encryption_key", nullable = false, length = 128)
+    private String encryptionKey;
 
+    @Column(name = "decryption_key", nullable = false, length = 128)
+    private String decryptionKey;
+
+    @PrePersist
+    public void generateKeys() {
+        this.encryptionKey = generateRandomKey();
+        this.decryptionKey = generateRandomKey();
+    }
+    private String generateRandomKey() {
+        return UUID.randomUUID().toString().replaceAll("-", "");
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -34,7 +52,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email;
+        return username;
     }
 
     @Override
