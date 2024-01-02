@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 
 @RestController
-@RequestMapping(path = "api/v1/file")
+@RequestMapping(path = "/api")
 public class FileEncryptController {
 
     @Autowired

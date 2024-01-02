@@ -8,14 +8,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
 
 @Controller
+@CrossOrigin(origins = "http://localhost:5174/")
 @RequestMapping(path = "/api")
 public class AuthenticationController {
   private final AuthenticationService authenticationService;
@@ -39,7 +41,11 @@ public class AuthenticationController {
             user.setPassword(signupDTO.getPassword());
             User registeredUser = authenticationService.registerUser(user);
             if (registeredUser != null) {
-              return new  ResponseEntity<>("Registration Successfull",HttpStatus.OK);
+                HashMap<String,String> resposneBody = new HashMap<>();
+                resposneBody.put("registration sucessful","added to the database");
+                resposneBody.put("encryption key",user.getEncryptionKey());
+                resposneBody.put("decryption key",user.getDecryptionKey());
+              return new  ResponseEntity<>(resposneBody,HttpStatus.OK);
             } else {
                 return new ResponseEntity<>("Registration Failed",HttpStatus.BAD_REQUEST);
             }
@@ -47,11 +53,19 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> authenticateUser(@RequestBody LoginDTO loginDto) {
-        Authentication authentication = authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        return new ResponseEntity<>("User login successfully!...", HttpStatus.OK);
+    public ResponseEntity<String> authenticateUser(@RequestBody LoginDTO loginDto) throws AuthenticationException {
+      try{
+          Authentication authentication = authenticationManager
+                  .authenticate(new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
+          SecurityContextHolder.getContext().setAuthentication(authentication);
+          return new ResponseEntity<>("User login successfully!...", HttpStatus.OK);
+
+      } catch(Exception e){
+          e.printStackTrace();
+          return new ResponseEntity<String>("could not login" + e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+
+      }
+
     }
 
     @GetMapping("/registertry")
@@ -59,10 +73,10 @@ public class AuthenticationController {
         return new ResponseEntity<>("testing Authentication controllers",HttpStatus.OK);
     }
 
-
-
-
-
-
+    @GetMapping("/all")
+    public ResponseEntity<List<User>> getAllEntities() {
+        List<User> entities = authenticationService.getAllEntities();
+        return new ResponseEntity<>(entities, HttpStatus.OK);
+    }
 
 }

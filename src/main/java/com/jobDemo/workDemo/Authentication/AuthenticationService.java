@@ -3,6 +3,9 @@ package com.jobDemo.workDemo.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class AuthenticationService {
 
@@ -26,8 +29,14 @@ public class AuthenticationService {
     public User getUserByEmail(String email){
         return (User) authenticationRepository.findByEmail(email).orElse(null);
     }
+
     public User getUserByUsername(String username){
-        return (User) authenticationRepository.findByEmail(username).orElse(null);
+        return (User) authenticationRepository.findByUsername(username).orElse(null);
+    }
+
+
+    public List<User> getAllEntities() {
+        return authenticationRepository.findAll();
     }
 }
 
