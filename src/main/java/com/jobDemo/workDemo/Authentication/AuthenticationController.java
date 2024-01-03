@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @Controller
-@CrossOrigin(origins = "http://localhost:5174/")
+@CrossOrigin(origins = "http://localhost:5173/")
 @RequestMapping(path = "/api")
 public class AuthenticationController {
   private final AuthenticationService authenticationService;
@@ -45,6 +45,7 @@ public class AuthenticationController {
                 resposneBody.put("registration sucessful","added to the database");
                 resposneBody.put("encryption key",user.getEncryptionKey());
                 resposneBody.put("decryption key",user.getDecryptionKey());
+                resposneBody.put("username",user.getUsername());
               return new  ResponseEntity<>(resposneBody,HttpStatus.OK);
             } else {
                 return new ResponseEntity<>("Registration Failed",HttpStatus.BAD_REQUEST);
@@ -53,20 +54,24 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> authenticateUser(@RequestBody LoginDTO loginDto) throws AuthenticationException {
-      try{
-          Authentication authentication = authenticationManager
-                  .authenticate(new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
-          SecurityContextHolder.getContext().setAuthentication(authentication);
-          return new ResponseEntity<>("User login successfully!...", HttpStatus.OK);
+    public ResponseEntity<String> login(@RequestBody LoginDTO loginDTO) {
+        try {
+            System.out.println("Received username: " + loginDTO.getUsername());
+            System.out.println("Received password: " + loginDTO.getPassword());
+            // Authenticate user
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword())
+            );
 
-      } catch(Exception e){
-          e.printStackTrace();
-          return new ResponseEntity<String>("could not login" + e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+            // If authentication succeeds, return a success message
+            return ResponseEntity.ok("Login successful");
 
-      }
-
+        } catch (AuthenticationException e) {
+            // If authentication fails, return an error message
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email/password");
+        }
     }
+
 
     @GetMapping("/registertry")
     public ResponseEntity<?> showRegistrationPage() {

@@ -10,8 +10,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173/")
 @RequestMapping(path = "/api")
 public class FileEncryptController {
 
@@ -29,8 +31,9 @@ public class FileEncryptController {
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFiles(
             @RequestParam("file")MultipartFile file,
-            @RequestParam("date") String uploadDate,
-            @RequestParam("username") String username) throws Exception {
+            @RequestParam("username") String username,
+            @RequestParam("encryptionKey") String encryptionKey,
+            @RequestParam("decryptionKey") String decryptionKey) throws Exception {
         User user = authenticationService.getUserByUsername(username);
         if (user != null) {
             try {
@@ -41,9 +44,9 @@ public class FileEncryptController {
                 fileSchema.setUser(user);
                 fileSchema.setFileName(file.getOriginalFilename());
                 fileSchema.setEncryptedContent(encryptedFile);
-                fileSchema.setUploadDate(LocalDateTime.parse(uploadDate)); // Parse the date string
                 fileSchema.setUploaderUsername(username);
-
+                fileSchema.setEncryptionKey(encryptionKey);
+                fileSchema.setDecryptionKey(decryptionKey);
                 fileSchemaRepository.save(fileSchema);
 
                 return new ResponseEntity<String>("File uploaded successfully", HttpStatus.OK);
@@ -56,7 +59,18 @@ public class FileEncryptController {
         } else {
             return new ResponseEntity<String>("username not found in database",HttpStatus.BAD_REQUEST);
         }
-
-
     }
+
+    @GetMapping("/user/{username}")
+    public ResponseEntity<List<FileSchema>> getUserFiles(@PathVariable String username) {
+        User user = authenticationService.getUserByUsername(username);
+        if (user != null) {
+            List<FileSchema> userFiles = fileSchemaRepository.findByUser(user);
+            return ResponseEntity.ok(userFiles);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
 }

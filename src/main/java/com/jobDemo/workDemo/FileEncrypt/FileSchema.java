@@ -24,12 +24,15 @@ public class FileSchema {
 
     @Column(name = "file_name", nullable = false)
     private String fileName;
-    @Column(name = "upload_date", nullable = false)
-    private LocalDateTime uploadDate;
-
+    @Column(name="encryption_keys",nullable = false)
+    private String encryptionKey;
+    @Column(name="decryption_keys",nullable = false)
+    private String decryptionKey;
     @Column(name = "encrypted_content", columnDefinition = "BLOB")
     private byte[] encryptedContent;
     @Column(name = "uploader_username")
     private String uploaderUsername;
+    @Column(name = "created_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP", insertable = false, updatable = false)
+    private LocalDateTime createdAt;
 
 }
