@@ -83,5 +83,15 @@ public class AuthenticationController {
         List<User> entities = authenticationService.getAllEntities();
         return new ResponseEntity<>(entities, HttpStatus.OK);
     }
+    @GetMapping("/user/data/{username}")
+    public ResponseEntity<User> getUserByUsername(@PathVariable("username") String username) {
+        User user = authenticationService.getUserByUsername(username);
+        if (user != null) {
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
 
 }
